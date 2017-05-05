@@ -15,7 +15,7 @@ interface to the .Net API.
 Prerequisites
 -------------
 If you are running CPython, you will need the additional module
-`pythonnet <https://pypi.python.org/pypi/pythonnet/2.1.0>`_ (tested with 2.1.0). IronPython does not
+`pythonnet <https://pypi.python.org/pypi/pythonnet/>`_ (tested with 2.1.0). IronPython does not
 need this module.
 
 and of course you need the TFS assemblies from e.g. VisualStudio to talk to the TFS server.
