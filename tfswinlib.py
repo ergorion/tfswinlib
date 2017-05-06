@@ -6,6 +6,7 @@
 # It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
 #
 # Version History:
+# V1.2.4 (2017-05-05) : edited the pypi metadata
 # V1.2.2 (2017-05-03) : cleaned up the imports
 # V1.2.1 (2017-04-26) : resolved a problem with accessing QueryMembership.None
 #                       with the help of the friendly pythonnet folks
