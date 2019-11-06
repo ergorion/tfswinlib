@@ -6,6 +6,7 @@
 # It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
 #
 # Version History:
+# V1.2.5 (2019-11-06) : had to change the import order
 # V1.2.4 (2017-05-05) : edited the pypi metadata
 # V1.2.2 (2017-05-03) : cleaned up the imports
 # V1.2.1 (2017-04-26) : resolved a problem with accessing QueryMembership.None
@@ -25,18 +26,24 @@
 #
 
 # necessary prework for .Net libraries to access TFS work items
+import clr
+#import System
 import sys
 sys.path.append(r"c:\Program Files\Microsoft Visual Studio 11\Common7\IDE\PrivateAssemblies")
 sys.path.append(r"C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\ReferenceAssemblies\v2.0")
 sys.path.append(r"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\ReferenceAssemblies\v2.0")
-import clr
 import datetime
 import logging
 import platform
 
 interpreter = platform.python_implementation()
 if  interpreter == 'CPython': # python + pythonnet
-    clr.AddReference("Microsoft.TeamFoundation")
+    try:
+        clr.AddReference("Microsoft.TeamFoundation")
+    except:
+        # things seem to have changed with VS2017:
+        sys.path.append(r'C:\Program Files (x86)\Microsoft Visual Studio\2017\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer')
+        clr.AddReference("Microsoft.VisualStudio.TeamFoundation")
     clr.AddReference("Microsoft.TeamFoundation.Common")
     clr.AddReference("Microsoft.TeamFoundation.WorkItemTracking.Client")
     clr.AddReference("Microsoft.TeamFoundation.VersionControl.Client")
@@ -155,7 +162,7 @@ Output: Dictionary {"project" : projectName, "me" : currentUserDisplayName}
     def get_list_of_work_items(self, query, paramsDict=None):
         '''get_list_of_work_items executes the query (in WIQL syntax) against the 
 server and returns an array of work items.
-Input: query (WIQL as a string)
+Input: query (WIQL as a string, e.g. "SELECT [State] FROM WorkItems WHERE [System.Title] CONTAINS 'bug'")
        paramsDict (optional; can contain parameters for macro lookup, e.g. @me/@project)
 Output: Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItemCollection'''
         if paramsDict is None: 
