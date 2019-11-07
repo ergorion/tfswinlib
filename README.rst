@@ -4,7 +4,7 @@ tfswinlib
 
 tfswinlib provides a comfort layer for working with Microsofts TeamFoundationServer using the TFS API.
 
-It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
+It has been tested with CPython 2.7.13, 3.6.1, 3.7.4 and IronPython 2.7.5
 
 Remarks
 -------
@@ -58,15 +58,15 @@ Sample Code
     # there are a couple of helper functions available as well
     listOfProjects = tfs.get_list_of_projects()
     # from this list you can find the name of your project
-	for i in range(len(listOfProjects)): print (projects[i].Name)
-	# and with this you can e.g. retrieve the stored queries for that project:
+    for i in range(len(listOfProjects)): print (projects[i].Name)
+    # and with this you can e.g. retrieve the stored queries for that project:
     storedQueries = tfs.get_list_of_stored_queries_for_project(projectName)
-    
+
     # some queries contain macros, e.g. @me or @project; they are expanded on the server
     # and need to be handed over to the get_list_of_work_items function:
     params = tfs.prepare_parameter_dictionary_for_query()
     workItems = tfs.get_list_of_work_items(query, params)
-    
+
     # it can also be useful to find out which users belong to a certain group:
     userNames = tfs.get_list_of_usernames_from_group("[My Team Project]\\Contributors")
   
