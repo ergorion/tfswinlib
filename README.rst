@@ -34,18 +34,32 @@ Sample Code
     wi = tfs.get_work_item(323356, 4)
     # and there is a method to simply print each available field of a work item:
     tfs.print_work_item (323356)
-    
+	# when you want to access single fields, you can either access it directly:
+	print (wi.State)
+	# or the more general way:
+    print (wi.Fields['State'].Value)
+	# and the number of Fields....
+	print (wi.Fields.Count)
+	
     # if you need to find work items, you can execute a WIQL query:
+	query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
     workItems = tfs.get_list_of_work_items(query)
+	
+	# you can then iterate over this list either with a counter:
+	for i in range(workItems.Count): print (workItems[i].Id)
+	# or:
+	for wi in workItems: print (wi.Id)
     
     # when you need to work with the history of states of a work items:
-    stateHistory = tfs.get_work_item_state_history(323356)
+    stateHistory = tfs.get_work_item_state_history(wi.Id)
     # or rather how long the work item was in each state:
-    stateDuration = tfs.get_work_item_state_duration(323356)
+    stateDuration = tfs.get_work_item_state_duration(wi.Id)
     
     # there are a couple of helper functions available as well
     listOfProjects = tfs.get_list_of_projects()
     # from this list you can find the name of your project
+	for i in range(len(listOfProjects)): print (projects[i].Name)
+	# and with this you can e.g. retrieve the stored queries for that project:
     storedQueries = tfs.get_list_of_stored_queries_for_project(projectName)
     
     # some queries contain macros, e.g. @me or @project; they are expanded on the server
