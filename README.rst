@@ -34,21 +34,21 @@ Sample Code
     wi = tfs.get_work_item(323356, 4)
     # and there is a method to simply print each available field of a work item:
     tfs.print_work_item (323356)
-	# when you want to access single fields, you can either access it directly:
-	print (wi.State)
-	# or the more general way:
+    # when you want to access single fields, you can either access it directly:
+    print (wi.State)
+    # or the more general way:
     print (wi.Fields['State'].Value)
-	# and the number of Fields....
-	print (wi.Fields.Count)
-	
+    # and the number of Fields....
+    print (wi.Fields.Count)
+
     # if you need to find work items, you can execute a WIQL query:
-	query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
+    query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
     workItems = tfs.get_list_of_work_items(query)
-	
-	# you can then iterate over this list either with a counter:
-	for i in range(workItems.Count): print (workItems[i].Id)
-	# or:
-	for wi in workItems: print (wi.Id)
+
+    # you can then iterate over this list either with a counter:
+    for i in range(workItems.Count): print (workItems[i].Id)
+    # or:
+    for wi in workItems: print (wi.Id)
     
     # when you need to work with the history of states of a work items:
     stateHistory = tfs.get_work_item_state_history(wi.Id)
