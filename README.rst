@@ -77,6 +77,8 @@ the links from each requests to also see the responses.
 Some helper functions
 ---------------------
 
+::
+
     # there are a couple of helper functions available as well
     listOfProjects = tfs.get_list_of_projects()
     # from this list you can find the name of your project
