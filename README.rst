@@ -73,7 +73,22 @@ Code Reviews basically are work items of a special type. You can retrieve a list
 code review requests (as seen in the example above). And from there, you can follow e.g.
 the links from each requests to also see the responses.
 
- 
+::
+
+    # let's assume you have a code review request in variable crr:
+    requester = crr.CreatedBy
+    state = crr.State
+ 	shelveset = crr.Fields['Associated Context'].Value
+    codeState = crr.Fields['Closed Status Code'].Value
+    # you can then find the Code Review Responses via the links:
+    for link in crr.Links:
+        print (link.LinkTypeEnd.Name, link.RelatedWorkItemId)
+    # when you follow those links, you can find out e.g. the closed status of
+    # the code review responses:
+    response = tfs.get_code_review(link.RelatedWorkItemId)
+    print (response.Fields['Closed Status'].Value)
+
+
 Some helper functions
 ---------------------
 
