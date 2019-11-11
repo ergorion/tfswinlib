@@ -119,6 +119,7 @@ TFS api method. Thus, you have access to the full universe of the TFS API, e.g. 
 or IdentityManagementServer.
 
 Here is the list:
+
 - tfs.wis: WorkItemStore
 - tfs.css: CommonStructureService
 - tfs.ims: IdentityManagementService
