@@ -5,6 +5,7 @@ tfswinlib
 tfswinlib provides a comfort layer for working with Microsofts TeamFoundationServer using the TFS API.
 
 It has been tested with CPython 2.7.13, 3.6.1, 3.7.4 and IronPython 2.7.5
+It support the Windows plattform only.
 
 Remarks
 -------
@@ -20,8 +21,8 @@ need this module.
 
 And of course you need the TFS assemblies from e.g. VisualStudio to talk to the TFS server.
 
-Sample Code
------------
+Basic Functions to access Work Items
+------------------------------------
 
 ::
     
@@ -55,6 +56,27 @@ Sample Code
     # or rather how long the work item was in each state:
     stateDuration = tfs.get_work_item_state_duration(wi.Id)
     
+    # when you need the links of a work item:
+    links = wi.Links
+    # you can iterate over this list, e.g.:
+    for link in links:
+        try:
+            print (' %s --> %s' % (link.LinkTypeEnd.Name, link.RelatedWorkItemId))
+        except:
+            print (link.ArtifactLinkType.Name)
+
+
+Code Reviews
+------------
+
+Code Reviews basically are work items of a special type. You can retrieve a list of all
+code review requests (as seen in the example above). And from there, you can follow e.g.
+the links from each requests to also see the responses.
+
+ 
+Some helper functions
+---------------------
+
     # there are a couple of helper functions available as well
     listOfProjects = tfs.get_list_of_projects()
     # from this list you can find the name of your project
@@ -69,6 +91,15 @@ Sample Code
 
     # it can also be useful to find out which users belong to a certain group:
     userNames = tfs.get_list_of_usernames_from_group("[My Team Project]\\Contributors")
+
+
+Advanced functions
+------------------
+
+tfswinlib makes available the most commonly used methods of the TFS api in a simplified manner.
+As we store the service access points in your TFS handle, you can access any available
+TFS api method. Thus, you have access to the full universe of the TFS API, e.g. VersionControlServer
+or IdentityManagementServer.
   
 Author
 ------

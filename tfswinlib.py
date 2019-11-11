@@ -6,7 +6,10 @@
 # It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
 #
 # Version History:
-# V1.2.5 (2019-11-06) : had to change the import order
+# V1.4.1 (2019-11-06) : had to change the import order
+# V1.4.0 (2018-11-23) : support code reviews
+# V1.3.1 (2017-11-23) : support version control (access to TFS path items)
+# V1.3.0 (2017-11-17) : support version control (checkins)
 # V1.2.4 (2017-05-05) : edited the pypi metadata
 # V1.2.2 (2017-05-03) : cleaned up the imports
 # V1.2.1 (2017-04-26) : resolved a problem with accessing QueryMembership.None
@@ -29,7 +32,7 @@
 import clr
 #import System
 import sys
-sys.path.append(r"c:\Program Files\Microsoft Visual Studio 11\Common7\IDE\PrivateAssemblies")
+sys.path.append(r"c:\Program Files\Microsoft Visual Studio 11.0\Common7\IDE\PrivateAssemblies")
 sys.path.append(r"C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\ReferenceAssemblies\v2.0")
 sys.path.append(r"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\ReferenceAssemblies\v2.0")
 import datetime
@@ -47,22 +50,25 @@ if  interpreter == 'CPython': # python + pythonnet
     clr.AddReference("Microsoft.TeamFoundation.Common")
     clr.AddReference("Microsoft.TeamFoundation.WorkItemTracking.Client")
     clr.AddReference("Microsoft.TeamFoundation.VersionControl.Client")
+    clr.AddReference('Microsoft.TeamFoundation.Discussion.Client')
 elif interpreter == 'IronPython':
     clr.AddReferenceByPartialName("Microsoft.TeamFoundation")
     clr.AddReferenceByPartialName("Microsoft.TeamFoundation.Common")
     clr.AddReferenceByPartialName("Microsoft.TeamFoundation.Client")
     clr.AddReferenceToFile("Microsoft.TeamFoundation.WorkItemTracking.Client.dll")
     clr.AddReferenceToFile("Microsoft.TeamFoundation.VersionControl.Client.dll")
+    clr.AddReferenceToFile('Microsoft.TeamFoundation.Discussion.Client.dll')
 else:
     print("This program requires either the usage of IronPython or CPython with pythonnet")
     sys.exit(-1)
 
 from Microsoft.TeamFoundation.Server import ICommonStructureService, IGroupSecurityService2, SearchFactor, QueryMembership
 from Microsoft.TeamFoundation.Client import TfsTeamProjectCollection, TfsTeamProjectCollectionFactory
-from Microsoft.TeamFoundation.VersionControl.Client import VersionControlServer
+from Microsoft.TeamFoundation.VersionControl.Client import VersionControlServer, VersionSpec, RecursionType, DateVersionSpec
 from Microsoft.TeamFoundation.WorkItemTracking.Client import WorkItemStore, QueryFolder, Query
 from Microsoft.TeamFoundation.Framework.Client import IIdentityManagementService
-from System import InvalidOperationException
+from Microsoft.TeamFoundation.Discussion.Client import TeamFoundationDiscussionService, DiscussionThread, QueryStoreOptions
+from System import InvalidOperationException, DateTime, AsyncCallback
 
 # the following lines are typically found in online source code samples
 #from Microsoft.TeamFoundation.Server import *
@@ -93,12 +99,13 @@ class TfsClient(object):
         if not self.server.HasAuthenticated:
             raise InvalidOperationException("TFS could not authenticate.")
         self.wis = self.server.GetService(WorkItemStore)
-        self.vcs = self.server.GetService(VersionControlServer)
         self.css = self.server.GetService(ICommonStructureService)
         self.ims = self.server.GetService(IIdentityManagementService)
         self.gss = self.server.GetService(IGroupSecurityService2)
+        self.vcs = self.server.GetService(VersionControlServer)
+        self.tfds = self.server.GetService(TeamFoundationDiscussionService)
         self._connected = True
-    
+        
     def get_list_of_projects(self):
         '''get_list_of_projects will return an array of Microsoft.TeamFoundation.Server.ProjectInfo.
 Input: 
@@ -229,6 +236,86 @@ Output: array of [(state1, duration1), (state2, duration2), ...]'''
                 exitChangeDate = datetime.datetime.now() 
             stateDuration.append((state, (exitChangeDate - enterChangeDate).__str__()))
         return stateDuration
+
+    def get_list_of_changesets(self, projectPath, 
+                                    versionSpec = VersionSpec.Latest, 
+                                    deletionId = 0, 
+                                    recursionType=RecursionType.Full, 
+                                    user = None, 
+                                    versionFrom = None, 
+                                    versionTo = None, 
+                                    maxCount=999, 
+                                    includeChanges = False, 
+                                    slotMode = False):
+        '''get_list_of_changesets retrieves a list of changesets according to
+the mostly optional parameters.
+(see https://msdn.microsoft.com/en-us/library/bb138960(v=vs.120).aspx)
+Input: projectPath, 
+       versionSpec = VersionSpec.Latest, 
+       deletionId = 0, 
+       recursionType=RecursionType.Full, 
+       user = None, 
+       versionFrom = None, 
+       versionTo = None, 
+       maxCount=999, 
+       includeChanges = False, 
+       slotMode = False
+Output: System.Collections.IEnumerable
+
+Example: you can iterate over the results, e.g.:
+result = tfs.get_list_of_changesets(path, versionFrom = DateTime.Now.AddHours(-48),
+versionTo = DateTime.Now.AddHours(-24))
+for ci in result: print ci.ChangesetId, ci.Owner, ci.Comment
+'''
+        return self.vcs.QueryHistory(projectPath, versionSpec, deletionId, recursionType, 
+                                     user, versionFrom, versionTo, maxCount, 
+                                     includeChanges, slotMode)
+
+    def get_change_set(self, changesetId, includeChanges=None,
+                       includeDownloadInfo = None,
+                       includeSourceRenames = None):
+        '''get_change_set retrieves the details of a specific changeset.
+The optional arguments cannot be combined 
+Input: changesetId
+       includeChanges (optional)
+       includeDownloadInfo (optional)
+       includeSourceRenames (optional)
+Output: Microsoft.TeamFoundation.VersionControl.Client.Changeset
+Example: cs = tfs.get_change_set(268029)
+'''
+        if includeChanges is None and includeDownloadInfo is None and includeSourceRenames is None:
+            return self.vcs.GetChangeset(changesetId)
+        elif includeDownloadInfo is None and includeSourceRenames is None:
+            return self.vcs.GetChangeset(changesetId, includeChanges)
+        elif includeSourceRenames is None:
+            return self.vcs.GetChangeset(changesetId, includeChanges, includeDownloadInfo)
+        else:
+            return self.vcs.GetChangeset(changesetId, includeChanges, includeDownloadInfo, includeSourceRenames)
+            
+    def get_list_of_items(self, projectPath, recursionType):
+        '''get_list_of_items retrieves a list of items from the version
+control system.
+Input: projectPath (TFS path)
+       recursionType (e.g. RecursionType.Full or None or OneLevel as defined by
+       Microsoft.TeamFoundation.VersionControl.Client.RecursionType)
+Output: Microsoft.TeamFoundation.VersionControl.Client.Item[]
+Example: items = get_list_of_items("$/ProjectName", RecursionType.None)
+         for item in items:
+             print item.ServerItem
+'''
+        return self.vcs.GetItems(projectPath, recursionType).get_Items()
+    
+    def get_item(self, projectPath):
+        return self.vcs.GetItem(projectPath)
+    
+    def get_code_review(self, codeReviewId):
+        '''get_code_review retrieves a code review (can be a request or a response).
+You could e.g. get a list of all review requests, do:
+query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
+reviewRequests = tfs.get_list_of_work_items(query) 
+and then call get_code_review on each retrieved work item it.
+'''
+        return self.get_work_item(codeReviewId)
 
 if __name__ == "__main__":
     print ('tfswinlib is a library and does not offer any end user functionality.')
