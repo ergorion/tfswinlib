@@ -117,6 +117,17 @@ tfswinlib makes available the most commonly used methods of the TFS api in a sim
 As we store the service access points in your TFS handle, you can access any available
 TFS api method. Thus, you have access to the full universe of the TFS API, e.g. VersionControlServer
 or IdentityManagementServer.
+
+Here is the list:
+# tfs.wis - WorkItemStore
+# tfs.css - CommonStructureService
+# tfs.ims - IdentityManagementService
+# tfs.gss - GroupSecurityService2
+# tfs.vcs - VersionControlServer
+# tfs.tfds - TeamFoundationDiscussionService
+
+Anything missing? Let me know...
+
   
 Author
 ------
