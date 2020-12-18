@@ -6,7 +6,7 @@
 # It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
 #
 # Version History:
-# V1.4.2 (2020-12-18) : improved error handling in print_work_item, and sort the names of the fields before printing
+# V1.4.2 (2020-12-18) : improved error handling in print_work_item, and make WorkItem available
 # V1.4.1 (2019-11-06) : had to change the import order
 # V1.4.0 (2018-11-23) : support code reviews
 # V1.3.1 (2017-11-23) : support version control (access to TFS path items)
