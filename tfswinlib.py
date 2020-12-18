@@ -6,6 +6,7 @@
 # It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
 #
 # Version History:
+# V1.4.2 (2020-12-18) : improved error handling in print_work_item, and sort the names of the fields before printing
 # V1.4.1 (2019-11-06) : had to change the import order
 # V1.4.0 (2018-11-23) : support code reviews
 # V1.3.1 (2017-11-23) : support version control (access to TFS path items)
@@ -65,7 +66,7 @@ else:
 from Microsoft.TeamFoundation.Server import ICommonStructureService, IGroupSecurityService2, SearchFactor, QueryMembership
 from Microsoft.TeamFoundation.Client import TfsTeamProjectCollection, TfsTeamProjectCollectionFactory
 from Microsoft.TeamFoundation.VersionControl.Client import VersionControlServer, VersionSpec, RecursionType, DateVersionSpec
-from Microsoft.TeamFoundation.WorkItemTracking.Client import WorkItemStore, QueryFolder, Query
+from Microsoft.TeamFoundation.WorkItemTracking.Client import WorkItemStore, QueryFolder, Query, WorkItem
 from Microsoft.TeamFoundation.Framework.Client import IIdentityManagementService
 from Microsoft.TeamFoundation.Discussion.Client import TeamFoundationDiscussionService, DiscussionThread, QueryStoreOptions
 from System import InvalidOperationException, DateTime, AsyncCallback
@@ -198,9 +199,17 @@ Output: none (prints out the field contents to STDOUT)
 '''
         workItem = self.get_work_item(itemId, revision)
         for i in range(workItem.Fields.Count):
-            print("%s: %s" % (workItem.Fields[i].Name,
-                              workItem.Fields[i].Value))
+            try:
+                print("%7d\t%s\t%s" % (workItem.Fields[i].Id,
+                                  workItem.Fields[i].Name,
+                                  workItem.Fields[i].Value))
+            except:# not a good style, but I currently don't know
+                # where this is defined: Microsoft.TeamFoundation.WorkItemTracking.Client.ValidationException:
+                logging.error('Error accessing field with index %d' % i)
+        print ("Numer of attachents: %d" % workItem.Attachments.Count)
+        print ("Numer of linked items: %d" % workItem.Links.Count)
         
+
     def get_work_item_state_history(self, workItem):
         '''get_work_item_state_history retrieves the complete list of unique states of a
 work item and when the work item entered that state.
