@@ -4,10 +4,9 @@ from distutils.core import setup
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-# setuptools.setup(
 setup(
     name='tfswinlib-pkg-ergorion',
-      version='1.4.2',
+      version='1.4.3',
       author='Axel Seibert',
       author_email='software at ergorion.com',
       description='tfswinlib provides a comfort layer for working with Microsofts TeamFoundationServer using the TFS API.',

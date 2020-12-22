@@ -3,9 +3,11 @@
 # tfswinlib provides a comfort layer for working with Microsofts
 # TeamFoundationServer using the TFS API. It works on CPython (with
 # pythonnet) as well as IronPython.
-# It has been tested with CPython 2.7.13 and 3.6.1 and IronPython 2.7.5
+# It has been tested with CPython 2.7.13 and 3.6.1, 3.7.7 and IronPython 2.7.5
+# 
 #
 # Version History:
+# V1.4.3 (2020-12-22) : make Link, Attachment available, change setup to work with current setup tools, rework the README
 # V1.4.2 (2020-12-18) : improved error handling in print_work_item, and make WorkItem available
 # V1.4.1 (2019-11-06) : had to change the import order
 # V1.4.0 (2018-11-23) : support code reviews
@@ -66,7 +68,7 @@ else:
 from Microsoft.TeamFoundation.Server import ICommonStructureService, IGroupSecurityService2, SearchFactor, QueryMembership
 from Microsoft.TeamFoundation.Client import TfsTeamProjectCollection, TfsTeamProjectCollectionFactory
 from Microsoft.TeamFoundation.VersionControl.Client import VersionControlServer, VersionSpec, RecursionType, DateVersionSpec
-from Microsoft.TeamFoundation.WorkItemTracking.Client import WorkItemStore, QueryFolder, Query, WorkItem
+from Microsoft.TeamFoundation.WorkItemTracking.Client import WorkItemStore, QueryFolder, Query, WorkItem, Link, Attachment
 from Microsoft.TeamFoundation.Framework.Client import IIdentityManagementService
 from Microsoft.TeamFoundation.Discussion.Client import TeamFoundationDiscussionService, DiscussionThread, QueryStoreOptions
 from System import InvalidOperationException, DateTime, AsyncCallback

@@ -21,7 +21,7 @@ need this module.
 
 And of course you need the TFS assemblies from e.g. VisualStudio to talk to the TFS server.
 
-Basic Functions to access Work Items
+Working with a single WorkItem
 ------------------------------------
 
 ::
@@ -41,21 +41,6 @@ Basic Functions to access Work Items
     print (wi.Fields['State'].Value)
     # and the number of Fields....
     print (wi.Fields.Count)
-
-    # if you need to find work items, you can execute a WIQL query:
-    query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
-    workItems = tfs.get_list_of_work_items(query)
-
-    # you can then iterate over this list either with a counter:
-    for i in range(workItems.Count): print (workItems[i].Id)
-    # or:
-    for wi in workItems: print (wi.Id)
-    
-    # when you need to work with the history of states of a work items:
-    stateHistory = tfs.get_work_item_state_history(wi.Id)
-    # or rather how long the work item was in each state:
-    stateDuration = tfs.get_work_item_state_duration(wi.Id)
-    
     # when you need the links of a work item:
     links = wi.Links
     # you can iterate over this list, e.g.:
@@ -64,6 +49,26 @@ Basic Functions to access Work Items
             print (' %s --> %s' % (link.LinkTypeEnd.Name, link.RelatedWorkItemId))
         except:
             print (link.ArtifactLinkType.Name)
+    # similarly, it is easy to access the attachments:
+    attachments = wi.Attachments
+
+
+Retrieving a list of WorkItems 
+------------------------------
+
+Before you can work on a single wi, you need to find it. And often you want to
+retrieve a list of work items that all satisfy a certain condition:
+
+::
+    
+    # if you need to find work items, you can execute a WIQL query:
+    query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
+    workItems = tfs.get_list_of_work_items(query)
+
+    # you can then iterate over this list either with a counter:
+    for i in range(workItems.Count): print (workItems[i].Id)
+    # or:
+    for wi in workItems: print (wi.Id)
 
 
 Code Reviews
@@ -89,12 +94,31 @@ the links from each requests to also see the responses.
     print (response.Fields['Closed Status'].Value)
 
 
-Some helper functions
----------------------
+Change Sets
+-----------
+
+Code Reviews basically are work items of a special type. You can retrieve a list of all
+code review requests (as seen in the example above). And from there, you can follow e.g.
+the links from each requests to also see the responses.
 
 ::
 
-    # there are a couple of helper functions available as well
+
+Some helper functions
+---------------------
+
+During development, I found a couple of helper functions to be quite useful:
+
+::
+
+    # first, as a reminder, a function that I mentioned above:
+    # a method to simply print each available field of a work item:
+    tfs.print_work_item (323356)
+    # when you need to work with the history of states of a work items:
+    stateHistory = tfs.get_work_item_state_history(wi.Id)
+    # or rather how long the work item was in each state:
+    stateDuration = tfs.get_work_item_state_duration(wi.Id)
+    # get a list of available projects:
     listOfProjects = tfs.get_list_of_projects()
     # from this list you can find the name of your project
     for i in range(len(listOfProjects)): print (projects[i].Name)
