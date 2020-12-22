@@ -97,12 +97,21 @@ the links from each requests to also see the responses.
 Change Sets
 -----------
 
-Code Reviews basically are work items of a special type. You can retrieve a list of all
-code review requests (as seen in the example above). And from there, you can follow e.g.
-the links from each requests to also see the responses.
+For changesets, there are two functions available:
 
 ::
 
+	# if you want to retrieve a list of changesets, then there is:
+	changesetList = tfs.get_list_of_changesets('$/<yourpathhere>')
+	# and you can iterate over the changeset list as usual:
+	for ci in changesetList: print ci.ChangesetId, ci.Owner, ci.Comment
+	
+	# you can also use more advanced queries:
+	changesetList = tfs.get_list_of_changesets('$/<yourpathhere>', versionFrom = tfswinlib.DateVersionSpec(DateTime.Now.AddHours(-48)))
+	
+	# and you can retrieve a specific changeset:
+	cs = tfs.get_change_set(4711)
+	print cs.Comment
 
 Some helper functions
 ---------------------
