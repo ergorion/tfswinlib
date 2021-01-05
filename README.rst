@@ -21,8 +21,8 @@ need this module.
 
 And of course you need the TFS assemblies from e.g. VisualStudio to talk to the TFS server.
 
-Working with a single WorkItem
-------------------------------------
+How to get started
+------------------
 
 ::
     
@@ -62,13 +62,26 @@ retrieve a list of work items that all satisfy a certain condition:
 ::
     
     # if you need to find work items, you can execute a WIQL query:
-    query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
+    query = """SELECT [System.Id] FROM WorkItems WHERE [System.WorkItemType] = 'Feature'"""
     workItems = tfs.get_list_of_work_items(query)
 
     # you can then iterate over this list either with a counter:
     for i in range(workItems.Count): print (workItems[i].Id)
     # or:
     for wi in workItems: print (wi.Id)
+
+
+You get all the features of WIQL (retrieving all types of work items, or
+using the ASOF operator):
+
+::
+    
+    # for historical analysis or reports, you can execute a WIQL query:
+    # I assume that the date format depends on your regional settings, here you can
+    # see my date format (European format). 
+    ccbDate = '01.12.2020'
+	query = """SELECT [System.Id] FROM WorkItems WHERE [System.WorkItemType] = 'Feature' asof '%s'""" % ccbDate
+	workItems = tfs.get_list_of_work_items(query)
 
 
 Code Reviews
@@ -80,24 +93,32 @@ the links from each requests to also see the responses.
 
 ::
 
+	query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
+	workItems = tfs.get_list_of_work_items(query)
+	
     # let's assume you have a code review request in variable crr:
+    crr = workItems[0]
     requester = crr.CreatedBy
     state = crr.State
  	shelveset = crr.Fields['Associated Context'].Value
     codeState = crr.Fields['Closed Status Code'].Value
+    # it seems that the field names tend to change; so, maybe you need to play around a bit:
+    criteria = crr.Fields['Acceptance Criteria'].Value
+    # if you do not know the names, this code snippet might help you:
+    print (sorted([field.Name for field in crr.Fields]))
     # you can then find the Code Review Responses via the links:
     for link in crr.Links:
         print (link.LinkTypeEnd.Name, link.RelatedWorkItemId)
-    # when you follow those links, you can find out e.g. the closed status of
-    # the code review responses:
+    # when you follow those links, you can find out e.g. the type of
+    # the link and continue appropriately:
     response = tfs.get_code_review(link.RelatedWorkItemId)
-    print (response.Fields['Closed Status'].Value)
+    print (response.Type.Name)
 
 
 Change Sets
 -----------
 
-For changesets, there are two functions available:
+For change sets, there are two functions available:
 
 ::
 
