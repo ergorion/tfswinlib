@@ -94,8 +94,7 @@ the links from each requests to also see the responses.
 ::
 
 	query = """SELECT [System.Id], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Code Review Request'"""
-	workItems = tfs.get_list_of_work_items(query)
-	
+	workItems = tfs.get_list_of_work_items(query)	
     # let's assume you have a code review request in variable crr:
     crr = workItems[0]
     requester = crr.CreatedBy
